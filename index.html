@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Alert System - USA</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <h1>Weather Alert USA</h1>
+            </div>
+            <div class="api-status">
+                <span id="api-status" class="status-indicator">
+                    <i class="fas fa-circle"></i> API Status
+                </span>
+            </div>
+        </header>
+
+        <!-- 预警横幅 -->
+        <div id="alert-banner" class="alert-banner hidden">
+            <div class="alert-content">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-text">
+                    <h3 id="alert-title">Weather Alert</h3>
+                    <p id="alert-description">Alert description</p>
+                </div>
+                <button id="close-alert" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 位置选择区域 -->
+        <section class="location-section">
+            <div class="location-controls">
+                <button id="gps-btn" class="btn btn-primary">
+                    <i class="fas fa-location-arrow"></i>
+                    Use My Location
+                </button>
+                <div class="search-container">
+                    <input type="text" id="city-search" placeholder="Enter US city name...">
+                    <button id="search-btn" class="btn btn-secondary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="current-location" class="current-location">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Location not selected</span>
+            </div>
+        </section>
+
+        <!-- 主要天气信息 -->
+        <main class="weather-main">
+            <div class="weather-card">
+                <div class="weather-primary">
+                    <div class="weather-icon">
+                        <i id="main-weather-icon" class="fas fa-question"></i>
+                    </div>
+                    <div class="weather-info">
+                        <div class="temperature">
+                            <span id="current-temp">--</span>
+                            <span class="unit">°F</span>
+                        </div>
+                        <div class="weather-desc" id="weather-desc">Loading...</div>
+                        <div class="feels-like">
+                            Feels like <span id="feels-like">--</span>°F
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <i class="fas fa-eye"></i>
+                        <span>Visibility</span>
+                        <span id="visibility">-- mi</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-tint"></i>
+                        <span>Humidity</span>
+                        <span id="humidity">--%</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-wind"></i>
+                        <span>Wind</span>
+                        <span id="wind-speed">-- mph</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-thermometer-half"></i>
+                        <span>Pressure</span>
+                        <span id="pressure">-- inHg</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 5天预报 -->
+        <section class="forecast-section">
+            <h2>5-Day Forecast</h2>
+            <div id="forecast-container" class="forecast-container">
+                <!-- 预报卡片将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 天气预警列表 -->
+        <section class="alerts-section">
+            <h2>Weather Alerts</h2>
+            <div id="alerts-container" class="alerts-container">
+                <div class="no-alerts">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No active weather alerts for this area</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 加载指示器 -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="spinner"></div>
+            <p>Loading weather data...</p>
+        </div>
+    </div>
+
+    <!-- 脚本文件 -->
+    <script src="weather-api.js"></script>
+    <script src="location.js"></script>
+    <script src="alerts.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 

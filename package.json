@@ -1,0 +1,33 @@
+{
+  "name": "weather-alert-usa",
+  "version": "1.0.0",
+  "description": "Weather Alert System for USA - Real-time weather information and severe weather alerts",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 3000 -c-1",
+    "dev": "http-server -p 3000 -c-1 -o",
+    "build": "echo 'No build process needed for static files'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "weather",
+    "alerts",
+    "USA",
+    "forecast",
+    "severe weather",
+    "real-time"
+  ],
+  "author": "Weather Alert System",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "local"
+  },
+  "homepage": "http://localhost:3000"
+} 
