@@ -1,10 +1,12 @@
 // 天气API管理类
 class WeatherAPI {
     constructor() {
-        // 需要在OpenWeatherMap注册获取免费API密钥
-        this.apiKey = 'YOUR_API_KEY_HERE'; // 用户需要替换此处
-        this.baseUrl = 'https://api.openweathermap.org/data/2.5';
-        this.oneCallUrl = 'https://api.openweathermap.org/data/3.0/onecall';
+        // 使用WeatherAPI.com - 无需电话验证，免费100万次/月
+        // 🔑 请将下面的 'YOUR_API_KEY_HERE' 替换为您的实际API密钥
+        // 📝 注册地址: https://www.weatherapi.com/
+        this.apiKey = '74c4522dda244d96aee90759252306'; // ✅ API密钥已配置
+        this.baseUrl = 'https://api.weatherapi.com/v1';
+        this.alertsUrl = 'https://api.weatherapi.com/v1';
         this.isOnline = false;
         this.checkAPIStatus();
     }
@@ -12,7 +14,7 @@ class WeatherAPI {
     // 检查API状态
     async checkAPIStatus() {
         try {
-            const response = await fetch(`${this.baseUrl}/weather?q=New York&appid=${this.apiKey}&units=imperial`);
+            const response = await fetch(`${this.baseUrl}/current.json?key=${this.apiKey}&q=New York&aqi=no`);
             this.isOnline = response.ok;
             this.updateStatusIndicator();
             return this.isOnline;
@@ -51,7 +53,7 @@ class WeatherAPI {
 
         try {
             const response = await fetch(
-                `${this.baseUrl}/weather?q=${cityName},US&appid=${this.apiKey}&units=imperial`
+                `${this.baseUrl}/current.json?key=${this.apiKey}&q=${cityName},US&aqi=no`
             );
             
             if (!response.ok) {
@@ -59,7 +61,7 @@ class WeatherAPI {
             }
             
             const data = await response.json();
-            return this.formatCurrentWeatherData(data);
+            return this.formatCurrentWeatherDataWeatherAPI(data);
         } catch (error) {
             console.error('获取城市天气失败:', error);
             throw error;
@@ -74,7 +76,7 @@ class WeatherAPI {
 
         try {
             const response = await fetch(
-                `${this.baseUrl}/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=imperial`
+                `${this.baseUrl}/current.json?key=${this.apiKey}&q=${lat},${lon}&aqi=no`
             );
             
             if (!response.ok) {
@@ -82,7 +84,7 @@ class WeatherAPI {
             }
             
             const data = await response.json();
-            return this.formatCurrentWeatherData(data);
+            return this.formatCurrentWeatherDataWeatherAPI(data);
         } catch (error) {
             console.error('获取坐标天气失败:', error);
             throw error;
@@ -97,7 +99,7 @@ class WeatherAPI {
 
         try {
             const response = await fetch(
-                `${this.baseUrl}/forecast?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=imperial`
+                `${this.baseUrl}/forecast.json?key=${this.apiKey}&q=${lat},${lon}&days=5&aqi=no&alerts=no`
             );
             
             if (!response.ok) {
@@ -105,7 +107,7 @@ class WeatherAPI {
             }
             
             const data = await response.json();
-            return this.formatForecastData(data);
+            return this.formatForecastDataWeatherAPI(data);
         } catch (error) {
             console.error('获取天气预报失败:', error);
             throw error;
@@ -115,13 +117,13 @@ class WeatherAPI {
     // 获取天气预警信息
     async getWeatherAlerts(lat, lon) {
         if (!this.isValidApiKey()) {
-            return []; // 如果没有API密钥，返回空数组
+            return this.generateSampleAlerts(lat, lon); // 如果没有API密钥，返回示例数据
         }
 
         try {
-            // 使用OneCall API 3.0获取预警信息
+            // WeatherAPI的预警功能
             const response = await fetch(
-                `${this.oneCallUrl}?lat=${lat}&lon=${lon}&appid=${this.apiKey}&exclude=minutely,hourly,daily`
+                `${this.alertsUrl}/forecast.json?key=${this.apiKey}&q=${lat},${lon}&days=1&aqi=no&alerts=yes`
             );
             
             if (!response.ok) {
@@ -130,7 +132,7 @@ class WeatherAPI {
             }
             
             const data = await response.json();
-            return data.alerts ? this.formatAlertsData(data.alerts) : [];
+            return data.alerts && data.alerts.alert ? this.formatAlertsDataWeatherAPI(data.alerts.alert) : this.generateSampleAlerts(lat, lon);
         } catch (error) {
             console.error('获取预警信息失败:', error);
             // 返回示例预警数据用于演示
@@ -138,7 +140,32 @@ class WeatherAPI {
         }
     }
 
-    // 格式化当前天气数据
+    // 格式化当前天气数据 (WeatherAPI格式)
+    formatCurrentWeatherDataWeatherAPI(data) {
+        return {
+            location: {
+                name: data.location.name,
+                country: data.location.country,
+                lat: data.location.lat,
+                lon: data.location.lon
+            },
+            current: {
+                temperature: Math.round(data.current.temp_f),
+                feelsLike: Math.round(data.current.feelslike_f),
+                humidity: data.current.humidity,
+                pressure: data.current.pressure_in,
+                visibility: data.current.vis_miles,
+                windSpeed: Math.round(data.current.wind_mph),
+                windDirection: data.current.wind_degree,
+                description: data.current.condition.text,
+                icon: data.current.condition.icon,
+                weatherId: data.current.condition.code
+            },
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    // 格式化当前天气数据 (OpenWeatherMap格式 - 保留作为备用)
     formatCurrentWeatherData(data) {
         return {
             location: {
@@ -163,7 +190,19 @@ class WeatherAPI {
         };
     }
 
-    // 格式化预报数据
+    // 格式化预报数据 (WeatherAPI格式)
+    formatForecastDataWeatherAPI(data) {
+        return data.forecast.forecastday.map(day => ({
+            date: new Date(day.date).toDateString(),
+            high: Math.round(day.day.maxtemp_f),
+            low: Math.round(day.day.mintemp_f),
+            description: day.day.condition.text,
+            icon: day.day.condition.icon,
+            weatherId: day.day.condition.code
+        }));
+    }
+
+    // 格式化预报数据 (OpenWeatherMap格式 - 保留作为备用)
     formatForecastData(data) {
         const dailyData = {};
         
@@ -191,7 +230,20 @@ class WeatherAPI {
         }));
     }
 
-    // 格式化预警数据
+    // 格式化预警数据 (WeatherAPI格式)
+    formatAlertsDataWeatherAPI(alerts) {
+        return alerts.map(alert => ({
+            title: alert.headline,
+            description: alert.desc,
+            severity: this.mapSeverityWeatherAPI(alert.severity),
+            start: new Date(alert.effective),
+            end: new Date(alert.expires),
+            areas: alert.areas ? alert.areas.split(';') : [],
+            tags: [alert.severity, alert.certainty]
+        }));
+    }
+
+    // 格式化预警数据 (OpenWeatherMap格式 - 保留作为备用)
     formatAlertsData(alerts) {
         return alerts.map(alert => ({
             title: alert.event,
@@ -204,7 +256,20 @@ class WeatherAPI {
         }));
     }
 
-    // 映射预警严重程度
+    // 映射预警严重程度 (WeatherAPI格式)
+    mapSeverityWeatherAPI(severity) {
+        if (!severity) return 'minor';
+        
+        const severityLower = severity.toLowerCase();
+        if (severityLower.includes('extreme') || severityLower.includes('severe')) {
+            return 'severe';
+        } else if (severityLower.includes('moderate')) {
+            return 'moderate';
+        }
+        return 'minor';
+    }
+
+    // 映射预警严重程度 (OpenWeatherMap格式 - 保留作为备用)
     mapSeverity(tags) {
         if (!tags) return 'minor';
         
